@@ -1,0 +1,26 @@
+<div class="container mt-5">
+  <!-- Botão para voltar -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="<%= applicants_path %>" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Voltar para Listagem de Funcionários
+      </a>
+    </div>
+  </div>
+
+  <!-- Título principal -->
+  <h1 class="mb-4 text-center">Relatórios de Funcionários</h1>
+
+  <div class="row g-4 mt-5">
+    <!-- Card para o relatório de salários -->
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-body text-center">
+          <h2 class="card-title h5">Relatório de Salários</h2>
+          <p class="card-text text-muted">Visualize os dados sobre as faixas salariais dos funcionários cadastrados.</p>
+          <a href="<%= reports_applicants_salary_path %>" class="btn btn-primary">Ver Relatório</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

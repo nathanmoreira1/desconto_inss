@@ -1,0 +1,10 @@
+pt-BR:
+  views:
+    pagination:
+      first: "Primeiro"
+      last: "Último"
+      previous: "Anterior"
+      next: "Próximo"
+      counter: "Mostrando página %{current_page} de %{total_pages}"
+      more: "Mais"
+      truncate: "..."

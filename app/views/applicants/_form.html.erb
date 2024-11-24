@@ -1,0 +1,163 @@
+<%= form_with model: @applicant, local: true, class: 'needs-validation', novalidate: true do |f| %>
+  <!-- Card: Dados Pessoais -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Dados Pessoais</h5>
+    </div>
+    <div class="card-body">
+      <div class="mb-3">
+        <%= f.label "Nome", class: 'form-label' %>
+        <%= f.text_field :name, class: 'form-control', required: true %>
+      </div>
+      <div class="row">
+        <div class="col-md-12 col-lg-6">
+          <%= f.label "CPF", class: 'form-label' %>
+          <%= f.text_field :cpf, class: 'form-control', required: true %>
+        </div>
+        <div class="col-md-12 col-lg-6">
+          <%= f.label "Data de Nascimento", class: 'form-label' %>
+          <%= f.date_field :birthdate, class: 'form-control', required: true %>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-12 col-lg-6">
+          <%= f.label "Salário", class: 'form-label' %>
+          <%= f.text_field :salary, class: 'form-control', required: true %>
+        </div>
+        <div class="col-md-12 col-lg-6">
+          <%= f.label "Desconto INSS", class: 'form-label' %>
+          <%= f.text_field :discount, class: 'form-control', required: true, disabled: true %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: Endereço -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h5 class="mb-0">Endereço</h5>
+    </div>
+    <div class="card-body">
+      <%= f.fields_for :address do |address_fields| %>
+        <!-- Campo CEP -->
+        <div class="mb-3">
+          <%= address_fields.label :postal_code, "CEP", class: 'form-label' %>
+          <%= address_fields.text_field :postal_code, class: 'form-control', required: true %>
+        </div>
+        
+        <div class="mb-3">
+          <%= address_fields.label :street, "Rua", class: 'form-label' %>
+          <%= address_fields.text_field :street, class: 'form-control', required: true %>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <%= address_fields.label :number, "Número", class: 'form-label' %>
+            <%= address_fields.text_field :number, class: 'form-control', required: true %>
+          </div>
+          <div class="col-md-6">
+            <%= address_fields.label :neighborhood, "Bairro", class: 'form-label' %>
+            <%= address_fields.text_field :neighborhood, class: 'form-control', required: true %>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <%= address_fields.label :city, "Cidade", class: 'form-label' %>
+            <%= address_fields.text_field :city, class: 'form-control', required: true %>
+          </div>
+          <div class="col-md-4">
+            <%= address_fields.label :state, "Estado", class: 'form-label' %>
+            <%= address_fields.text_field :state, class: 'form-control', required: true %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="text-end mb-3">
+    <%= link_to 'Voltar', applicants_path, class: 'btn btn-secondary me-2' %>
+    <%= f.submit 'Salvar', class: 'btn btn-success' %>
+  </div>
+<% end %>
+
+<script>
+  $(document).ready(function () {
+    const form = $('.needs-validation');
+    const salaryInput = $('#applicant_salary');
+    const discountInput = $('#applicant_discount');
+    const cpfInput = $('#applicant_cpf');
+    const cepInput = $('#applicant_address_attributes_postal_code');
+
+    cepInput.mask('00000-000');
+
+    cpfInput.mask('000.000.000-00');
+  
+    if ($(salaryInput.val())) {
+      let initialSalary = parseFloat(salaryInput.val());
+      $(salaryInput).val(initialSalary.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+
+    salaryInput.mask('000.000.000,00', { reverse: true });
+
+    salaryInput.on('input', function () {
+      let rawSalary = $(this).val().replace(/\./g, '').replace(',', '.');
+
+      rawSalary = parseFloat(rawSalary) || 0;
+
+      $.ajax({
+        url: '/applicants/calculate_inss',
+        type: 'POST',
+        data: JSON.stringify({ salary: rawSalary }),
+        contentType: 'application/json',
+        headers: {
+          'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function (data) {
+          if (discountInput.length) {
+            discountInput.val(data.discount.toFixed(2).replace('.', ','));
+          }
+        },
+        error: function () {
+          console.error('Erro ao calcular INSS.');
+        },
+      });
+    });
+
+    cepInput.on('blur', function() {
+      var cep = $(this).val().replace(/\D/g, '');
+
+      if (cep.length === 8) {
+        $.getJSON('https://viacep.com.br/ws/' + cep + '/json/', function(data) {
+          if (!data.erro) {
+            $('#applicant_address_attributes_street').val(data.logradouro);
+            $('#applicant_address_attributes_city').val(data.localidade);
+            $('#applicant_address_attributes_state').val(data.uf);
+            $('#applicant_address_attributes_neighborhood').val(data.bairro);
+          } else {
+            alert('CEP não encontrado!');
+          }
+        });
+      } else {
+        alert('Digite um CEP válido!');
+      }
+    })
+
+    if ($(discountInput.val())) {
+      let initialDiscount = parseFloat(discountInput.val());
+      $(discountInput).val(initialDiscount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+
+    discountInput.mask('000.000.000,00', { reverse: true }).prop('disabled', true);
+
+    if (form.length) {
+      form.on('submit', function () {
+        if (cpfInput.length) {
+          cpfInput.val(cpfInput.val().replace(/\D/g, ''));
+        }
+        if (salaryInput.length) {
+          salaryInput.val(salaryInput.val().replace(/\./g, '').replace(',', '.'));
+        }
+      });
+    }
+  });
+</script>
+
