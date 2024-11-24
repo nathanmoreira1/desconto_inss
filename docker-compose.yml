@@ -1,0 +1,25 @@
+services:
+  web:
+    build: .
+    volumes:
+      - ".:/rails"
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=postgresql://rails_user:password@db/rails_db
+    depends_on:
+      - db
+    command: bash -c "bin/rails db:create db:migrate db:seed && bin/rails server -b '0.0.0.0'"
+
+  db:
+    image: postgres:13
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: rails_user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rails_db
+
+volumes:
+  pg_data:

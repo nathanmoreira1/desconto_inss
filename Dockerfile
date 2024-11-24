@@ -1,77 +1,57 @@
 # syntax=docker/dockerfile:1
-# check=error=true
-
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t desconto_inss .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name desconto_inss desconto_inss
-
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
+# Definindo a versão do Ruby, para que seja a mesma utilizada no projeto
 ARG RUBY_VERSION=3.3.6
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
 # Rails app lives here
 WORKDIR /rails
 
-# Install base packages
+# Instalar pacotes básicos para o ambiente de desenvolvimento
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libpq-dev libvips sqlite3 nodejs yarn git build-essential && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Set production environment
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
+# Configuração do ambiente de desenvolvimento
+ENV RAILS_ENV="development" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development"
+    BUNDLE_WITHOUT="production"
 
-# Throw-away build stage to reduce size of final image
+# Instalar pacotes necessários para compilar gems
 FROM base AS build
 
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Install application gems
+# Instalar gems do projeto
 COPY Gemfile Gemfile.lock ./
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    bundle exec bootsnap precompile --gemfile
+RUN bundle install
 
-# Copy application code
+# Copiar o código da aplicação
 COPY . .
 
-# Precompile bootsnap code for faster boot times
-RUN bundle exec bootsnap precompile app/ lib/
-
-# Adjust binfiles to be executable on Linux
+# Ajustar permissões de arquivos binários
+# Ajustar permissões de arquivos binários e corrigir a formatação dos scripts
 RUN chmod +x bin/* && \
     sed -i "s/\r$//g" bin/* && \
+    sed -i 's/\r//' bin/* && \
     sed -i 's/ruby\.exe$/ruby/' bin/*
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
-
-
-
-
-# Final stage for app image
+# Finalizando a imagem de desenvolvimento
 FROM base
 
-# Copy built artifacts: gems, application
+# Copiar os artefatos construídos (gems e código da aplicação)
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Run and own only the runtime files as a non-root user for security
+# Definir a imagem para rodar como usuário não-root
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
     chown -R rails:rails db log storage tmp
+
 USER 1000:1000
 
-# Entrypoint prepares the database.
+# Entrypoint para o Rails, ajustado para o ambiente de desenvolvimento
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
-EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+# Expor a porta 3000 (padrão para desenvolvimento)
+EXPOSE 3000
+
+# Comando para rodar o servidor Rails no modo de desenvolvimento
+CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
