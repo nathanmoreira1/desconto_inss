@@ -1,33 +1,32 @@
 <div class="container mt-5 mb-5">
-  <div class="row mb-4">
-    <div class="col-12">
-      <a href="<%= reports_applicants_path %>" class="btn btn-secondary">
-        <i class="bi bi-arrow-left-circle"></i> Voltar para Relatórios de Funcionários
-      </a>
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h5 class="mb-0">Relatório de Faixas Salariais</h5>
     </div>
-  </div>
+    <div class="card-body">
+      <div class="mb-4">
+        <a href="<%= reports_applicants_path %>" class="btn btn-secondary">
+          <i class="bi bi-arrow-left-circle"></i> Voltar para Relatórios de Funcionários
+        </a>
+      </div>
 
-  <div class="row">
-    <div class="col-12">
-      <h1 class="text-center mb-4">Relatório de Faixas Salariais</h1>
-    </div>
-  </div>
+      <div class="mb-5">
+        <h2 class="text-primary">Resumo das Faixas Salariais</h2>
+        <div class="table-responsive mt-2">
+          <%= render 'reports/applicants/salary/table', brackets: @brackets %>
+        </div>
+      </div>
 
-  <div class="row mb-5">
-    <div class="col-12">
-      <h2 class="text-primary">Resumo das Faixas Salariais</h2>
-      <div class="table-responsive mt-2">
-        <%= render 'reports/applicants/salary/table', brackets: @brackets %>
+      <div>
+        <h2 class="text-primary">Gráfico de Distribuição</h2>
+        <div class="chart-container bg-light p-4 rounded shadow mt-2" style="position: relative; height: 50vh; width: 100%;">
+          <%= render 'reports/applicants/salary/chart', brackets: @brackets %>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12">
-      <h2 class="text-primary">Gráfico de Distribuição</h2>
-      <div class="chart-container bg-light p-4 rounded shadow mt-2" style="position: relative; height: 50vh; width: 100%;">
-        <%= render 'reports/applicants/salary/chart', brackets: @brackets %>
-      </div>
+    <div class="card-footer text-center">
+      <p class="mb-0 text-muted">Análise gerada com base nos dados cadastrados.</p>
     </div>
   </div>
 </div>
