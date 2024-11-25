@@ -7,6 +7,6 @@ class Applicant < ApplicationRecord
   validates :name, :cpf, :birthdate, :salary, :discount, presence: true
 
   def self.ransackable_attributes(auth_object = nil)
-    ["birthdate", "cpf", "name"]
+    [ "birthdate", "cpf", "name" ]
   end
 end

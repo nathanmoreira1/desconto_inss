@@ -19,9 +19,9 @@ gem "jbuilder"
 # Use Devise for authentication
 gem "devise"
 # Use PostgreSQL as the database for Active Record
-gem 'pg'
+gem "pg"
 # Use dotenv for environment variables
-gem 'dotenv-rails', groups: [:development, :test]
+gem "dotenv-rails", groups: [ :development, :test ]
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -44,13 +44,13 @@ gem "thruster", require: false
 gem "bootstrap"
 gem "sassc-rails"
 
-gem 'kaminari'
+gem "kaminari"
 
-gem 'ransack'
+gem "ransack"
 
-gem 'sidekiq'
+gem "sidekiq"
 
-gem 'redis'
+gem "redis"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -64,9 +64,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
-  gem 'pry-rails'
-  gem 'pry-byebug'
-  gem 'faker'
+  gem "pry-rails"
+  gem "pry-byebug"
+  gem "faker"
 end
 
 group :test do
