@@ -42,60 +42,98 @@
       <h5 class="mb-0">Lista de Funcionários</h5>
     </div>
     <div class="card-body">
-      <table class="table table-striped mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>Nome</th>
-            <th>CPF</th>
-            <th>Data de Nascimento</th>
-            <th>Salário</th>
-            <th>Desconto INSS</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% ApplicantPresenter.wrap(@applicants).each do |applicant| %>
+      <div class="d-none d-md-block">
+        <!-- Tabela para telas maiores -->
+        <table class="table table-striped mb-0">
+          <thead class="table-light">
             <tr>
-              <td><%= applicant.name %></td>
-              <td><%= applicant.cpf %></td>
-              <td><%= applicant.birthdate %></td>
-              <td><%= applicant.salary %></td>
-              <td><%= applicant.discount %></td>
-              <td class="d-flex align-items-center">
-                <%= link_to edit_applicant_path(applicant.id), class: 'text-primary me-2', title: 'Editar' do %>
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Data de Nascimento</th>
+              <th>Salário</th>
+              <th>Desconto INSS</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% ApplicantPresenter.wrap(@applicants).each do |applicant| %>
+              <tr>
+                <td><%= applicant.name %></td>
+                <td><%= applicant.cpf %></td>
+                <td><%= applicant.birthdate %></td>
+                <td><%= applicant.salary %></td>
+                <td><%= applicant.discount %></td>
+                <td class="d-flex align-items-center">
+                  <%= link_to edit_applicant_path(applicant.id), class: 'text-primary me-2', title: 'Editar' do %>
+                    <i class="bi bi-pencil"></i>
+                  <% end %>
+                  <%= button_to applicant_path(applicant.id), 
+                                method: :delete, 
+                                data: { confirm: 'Você tem certeza?' }, 
+                                title: 'Excluir', 
+                                style: 'background-color: transparent; border: none; padding: 0; color: red; text-decoration: none; cursor: pointer;' do %>
+                    <i class="bi bi-trash"></i>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Listagem para telas menores -->
+      <div class="d-md-none">
+        <% ApplicantPresenter.wrap(@applicants).each do |applicant| %>
+          <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title"><%= applicant.name %></h5>
+              <p class="card-text">
+                <strong>CPF:</strong> <%= applicant.cpf %><br>
+                <strong>Data de Nascimento:</strong> <%= applicant.birthdate %><br>
+                <strong>Salário:</strong> <%= applicant.salary %><br>
+                <strong>Desconto INSS:</strong> <%= applicant.discount %>
+              </p>
+              <div class="d-flex justify-content-end">
+                <%= link_to edit_applicant_path(applicant.id), class: 'btn btn-primary btn-sm me-2', title: 'Editar' do %>
                   <i class="bi bi-pencil"></i>
                 <% end %>
                 <%= button_to applicant_path(applicant.id), 
                               method: :delete, 
                               data: { confirm: 'Você tem certeza?' }, 
-                              title: 'Excluir', 
-                              style: 'background-color: transparent; border: none; padding: 0; color: red; text-decoration: none; cursor: pointer;' do %>
+                              class: 'btn btn-danger btn-sm', 
+                              title: 'Excluir' do %>
                   <i class="bi bi-trash"></i>
                 <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
     </div>
 
     <div class="card-footer text-center">
-      <%= paginate @applicants, class: 'pagination justify-content-center mb-0' %>
+      <!-- Paginação para telas maiores -->
+      <div class="d-none d-md-block">
+        <%= paginate @applicants, class: 'pagination justify-content-center mb-0' %>
+      </div>
+      
+      <!-- Paginação simplificada para telas menores -->
+      <div class="d-md-none">
+        <nav>
+          <ul class="pagination justify-content-center">
+            <% if @applicants.prev_page %>
+              <li class="page-item">
+                <%= link_to 'Anterior', url_for(page: @applicants.prev_page), class: 'page-link' %>
+              </li>
+            <% end %>
+            <% if @applicants.next_page %>
+              <li class="page-item">
+                <%= link_to 'Próximo', url_for(page: @applicants.next_page), class: 'page-link' %>
+              </li>
+            <% end %>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
 </div>
-
-<script>
-  const cpfSearchInput = $('#q_cpf_cont');
-  const form = $('#applicant_search');
-
-  cpfSearchInput.mask('000.000.000-00');
-
-  if (form.length) {
-    form.on('submit', function () {
-      if (cpfSearchInput.length) {
-        cpfSearchInput.val(cpfSearchInput.val().replace(/\D/g, ''));
-      }
-    });
-  }
-</script>
