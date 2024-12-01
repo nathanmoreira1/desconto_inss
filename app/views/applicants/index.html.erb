@@ -137,3 +137,20 @@
     </div>
   </div>
 </div>
+
+<script>
+  $(document).ready(function () {
+    const searchForm = $("#applicant_search")
+    const seachCpfInput = $('#q_cpf_cont');
+
+    seachCpfInput.mask('000.000.000-00');
+
+    if (searchForm.length) {
+      searchForm.on('submit', function () {
+        if (seachCpfInput.length) {
+          seachCpfInput.val(seachCpfInput.val().replace(/\D/g, ''));
+        }
+      });
+    }
+  });
+</script>
